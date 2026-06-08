@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PYBERTAT — Музыкальный портал</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --dark: #0a0806;
+    --dark-mid: #141008;
+    --dark-surface: #1c160e;
+    --dark-border: #2a2218;
+    --red: #8b1a1a;
+    --red-glow: #c0392b;
+    --text: #d4c5a9;
+    --text-dim: #7a6e5e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 0% 50%, rgba(139,26,26,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 100% 50%, rgba(139,26,26,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .rune-line {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    justify-content: center;
+  }
+
+  .rune-line::before,
+  .rune-line::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    max-width: 120px;
+  }
+
+  .rune-symbol {
+    color: var(--gold);
+    font-size: 18px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    color: var(--gold-light);
+    text-shadow: 0 0 40px rgba(201,168,76,0.3), 0 2px 4px rgba(0,0,0,0.8);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--dark-border), var(--gold), var(--dark-border), transparent);
+    margin: 32px 0;
+  }
+
+  .card {
+    background: var(--dark-surface);
+    border: 1px solid var(--dark-border);
+    border-radius: 2px;
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20px; right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--dark-border), transparent);
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    background: var(--dark);
+    border: 1px solid var(--dark-border);
+    border-radius: 2px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 16px;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.15), inset 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  .token-hint {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: -10px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .token-hint a {
+    color: var(--gold);
+    text-decoration: none;
+    opacity: 0.8;
+  }
+
+  .token-hint a:hover { opacity: 1; }
+
+  .drop-zone {
+    border: 1px dashed var(--dark-border);
+    border-radius: 2px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--dark);
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .drop-zone:hover,
+  .drop-zone.dragover {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.03);
+  }
+
+  .drop-zone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+    opacity: 0.4;
+  }
+
+  .drop-text {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .drop-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    opacity: 0.6;
+  }
+
+  .file-selected {
+    display: none;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 2px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: var(--gold-light);
+    align-items: center;
+    gap: 10px;
+  }
+
+  .file-selected.show { display: flex; }
+
+  .file-icon { font-size: 18px; }
+
+  button {
+    width: 100%;
+    padding: 14px 24px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    color: var(--gold-light);
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  button:hover::before { opacity: 1; }
+  button:hover { box-shadow: 0 0 20px rgba(201,168,76,0.15); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button:disabled::before { display: none; }
+
+  .progress-wrap {
+    display: none;
+    margin-top: 16px;
+  }
+
+  .progress-wrap.show { display: block; }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--dark-border);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  .progress-text {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+  }
+
+  .result-card {
+    display: none;
+    background: rgba(10, 30, 10, 0.5);
+    border: 1px solid rgba(50, 150, 50, 0.3);
+    border-radius: 2px;
+    padding: 24px;
+    margin-top: 16px;
+  }
+
+  .result-card.show { display: block; }
+  .result-card.error {
+    background: rgba(30, 10, 10, 0.5);
+    border-color: rgba(150, 50, 50, 0.3);
+  }
+
+  .result-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: #4a9; 
+  }
+
+  .result-card.error .result-label { color: #a44; }
+
+  .result-url {
+    background: var(--dark);
+    border: 1px solid var(--dark-border);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text);
+    word-break: break-all;
+    font-family: monospace;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  .copy-btn {
+    width: auto;
+    padding: 8px 20px;
+    font-size: 10px;
+    border-color: rgba(74, 170, 100, 0.5);
+    color: #4a9;
+  }
+
+  .copy-btn:hover { border-color: #4a9; box-shadow: 0 0 15px rgba(74,170,100,0.15); }
+
+  .tracks-list {
+    margin-top: 8px;
+  }
+
+  .track-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--dark-border);
+    transition: background 0.15s;
+  }
+
+  .track-item:last-child { border-bottom: none; }
+  .track-item:hover { background: rgba(201,168,76,0.03); }
+
+  .track-name {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .track-copy {
+    width: auto;
+    padding: 5px 14px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    flex-shrink: 0;
+  }
+
+  .empty-tracks {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .saved-notice {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--dark-surface);
+    border: 1px solid var(--gold);
+    padding: 10px 24px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--gold-light);
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<div class="container">
+  <header>
+    <div class="rune-line">
+      <span class="rune-symbol">⚔</span>
+    </div>
+    <h1>PYBERTAT</h1>
+    <div class="subtitle">Музыкальный Портал</div>
+  </header>
+
+  <!-- Настройки токена -->
+  <div class="card" id="settings-card">
+    <div class="card-title">⚙ Настройки</div>
+    <label>GitHub Token</label>
+    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="token-hint">
+      Создай токен на <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> с правом <strong>repo</strong>. Токен сохраняется локально в браузере.
+    </div>
+    <label>Репозиторий (owner/repo)</label>
+    <input type="text" id="github-repo" placeholder="Addicktoll/music_pybertat">
+    <label>Ветка</label>
+    <input type="text" id="github-branch" placeholder="main">
+    <button onclick="saveSettings()">✦ Сохранить настройки</button>
+  </div>
+
+  <!-- Загрузка -->
+  <div class="card">
+    <div class="card-title">♪ Загрузить трек</div>
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" id="file-input" accept=".mp3,.ogg,.wav,.flac">
+      <span class="drop-icon">🎵</span>
+      <div class="drop-text">Перетащи файл или нажми</div>
+      <div class="drop-sub">MP3, OGG, WAV, FLAC</div>
+    </div>
+    <div class="file-selected" id="file-selected">
+      <span class="file-icon">🎵</span>
+      <span id="file-name">файл.mp3</span>
+    </div>
+    <button id="upload-btn" onclick="uploadFile()" disabled>✦ Загрузить на сервер</button>
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-text" id="progress-text">Загрузка...</div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-label" id="result-label">✦ Ссылка для Etched</div>
+      <div class="result-url" id="result-url"></div>
+      <button class="copy-btn" onclick="copyResult()">Скопировать ссылку</button>
+    </div>
+  </div>
+
+  <!-- Список треков -->
+  <div class="card">
+    <div class="card-title">♬ Треки в репозитории</div>
+    <div id="tracks-list" class="tracks-list">
+      <div class="empty-tracks">Загрузи трек чтобы он появился здесь</div>
+    </div>
+    <button onclick="loadTracks()" style="margin-top:16px; font-size:10px; padding:10px;">↻ Обновить список</button>
+  </div>
+
+  <div class="saved-notice">Настройки сохраняются в localStorage вашего браузера</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let selectedFile = null;
+
+// Загрузка сохранённых настроек
+window.addEventListener('load', () => {
+  const token = localStorage.getItem('gh_token') || '';
+  const repo = localStorage.getItem('gh_repo') || 'Addicktoll/music_pybertat';
+  const branch = localStorage.getItem('gh_branch') || 'main';
+  document.getElementById('github-token').value = token;
+  document.getElementById('github-repo').value = repo;
+  document.getElementById('github-branch').value = branch;
+  if (token && repo) loadTracks();
+});
+
+function saveSettings() {
+  localStorage.setItem('gh_token', document.getElementById('github-token').value.trim());
+  localStorage.setItem('gh_repo', document.getElementById('github-repo').value.trim());
+  localStorage.setItem('gh_branch', document.getElementById('github-branch').value.trim());
+  showToast('Настройки сохранены');
+  loadTracks();
+}
+
+function getSettings() {
+  return {
+    token: document.getElementById('github-token').value.trim(),
+    repo: document.getElementById('github-repo').value.trim(),
+    branch: document.getElementById('github-branch').value.trim() || 'main'
+  };
+}
+
+// Drag & drop
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+function setFile(file) {
+  selectedFile = file;
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-selected').classList.add('show');
+  document.getElementById('upload-btn').disabled = false;
+  document.getElementById('result-card').classList.remove('show', 'error');
+}
+
+async function uploadFile() {
+  const { token, repo, branch } = getSettings();
+  if (!token || !repo) { showToast('Сначала сохрани настройки!'); return; }
+  if (!selectedFile) return;
+
+  const btn = document.getElementById('upload-btn');
+  btn.disabled = true;
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressFill = document.getElementById('progress-fill');
+  const progressText = document.getElementById('progress-text');
+  progressWrap.classList.add('show');
+  progressFill.style.width = '20%';
+  progressText.textContent = 'Читаю файл...';
+
+  try {
+    const base64 = await fileToBase64(selectedFile);
+    progressFill.style.width = '50%';
+    progressText.textContent = 'Загружаю на GitHub...';
+
+    const fileName = selectedFile.name;
+    const apiUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(fileName)}`;
+
+    // Проверяем существует ли файл (чтобы получить sha для обновления)
+    let sha = null;
+    try {
+      const checkRes = await fetch(apiUrl, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        sha = checkData.sha;
+      }
+    } catch(e) {}
+
+    const body = { message: `Add ${fileName}`, content: base64, branch };
+    if (sha) body.sha = sha;
+
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    progressFill.style.width = '90%';
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Ошибка GitHub API');
+    }
+
+    progressFill.style.width = '100%';
+    progressText.textContent = 'Готово!';
+
+    const rawUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${encodeURIComponent(fileName)}`;
+    const resultCard = document.getElementById('result-card');
+    resultCard.classList.remove('error');
+    resultCard.classList.add('show');
+    document.getElementById('result-label').textContent = '✦ Ссылка для Etched';
+    document.getElementById('result-url').textContent = rawUrl;
+
+    loadTracks();
+    showToast('Трек успешно загружен!');
+  } catch(e) {
+    progressFill.style.width = '100%';
+    progressFill.style.background = '#a44';
+    progressText.textContent = 'Ошибка: ' + e.message;
+    const resultCard = document.getElementById('result-card');
+    resultCard.classList.add('show', 'error');
+    document.getElementById('result-label').textContent = '✗ Ошибка';
+    document.getElementById('result-url').textContent = e.message;
+  }
+
+  btn.disabled = false;
+}
+
+async function loadTracks() {
+  const { token, repo, branch } = getSettings();
+  if (!token || !repo) return;
+
+  const list = document.getElementById('tracks-list');
+  list.innerHTML = '<div class="empty-tracks">Загрузка...</div>';
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/?ref=${branch}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) throw new Error('Не удалось загрузить список');
+    const files = await res.json();
+    const audio = files.filter(f => /\.(mp3|ogg|wav|flac)$/i.test(f.name));
+
+    if (audio.length === 0) {
+      list.innerHTML = '<div class="empty-tracks">Треков пока нет</div>';
+      return;
+    }
+
+    list.innerHTML = audio.map(f => {
+      const rawUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${encodeURIComponent(f.name)}`;
+      return `<div class="track-item">
+        <span class="track-name">🎵 ${f.name}</span>
+        <button class="track-copy" onclick="copyUrl('${rawUrl.replace(/'/g, "\\'")}')">Копировать</button>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = `<div class="empty-tracks">Ошибка: ${e.message}</div>`;
+  }
+}
+
+function copyUrl(url) {
+  navigator.clipboard.writeText(url).then(() => showToast('Ссылка скопирована!'));
+}
+
+function copyResult() {
+  const url = document.getElementById('result-url').textContent;
+  navigator.clipboard.writeText(url).then(() => showToast('Скопировано!'));
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
