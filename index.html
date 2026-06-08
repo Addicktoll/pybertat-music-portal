@@ -418,6 +418,43 @@
     font-style: italic;
   }
 
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--gold);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .step-text a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  .step-text a:hover { text-decoration: underline; }
+  .step-text strong { color: var(--gold-light); }
+
   .saved-notice {
     font-size: 11px;
     color: var(--text-dim);
@@ -462,13 +499,38 @@
     <div class="subtitle">Музыкальный Портал</div>
   </header>
 
+  <!-- Инструкция -->
+  <div class="card" id="howto-card">
+    <div class="card-title">📜 Как пользоваться</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          Зайди на <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → создай токен Classic с галкой <strong>public_repo</strong> → скопируй его
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Вставь токен в поле ниже и нажми <strong>Сохранить настройки</strong> — это делается один раз</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Перетащи mp3 файл → нажми <strong>Загрузить</strong> → скопируй ссылку и вставь в Etched в игре</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">В разделе <strong>Треки</strong> видны все загруженные треки — можно скопировать ссылку на любой</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Настройки токена -->
   <div class="card" id="settings-card">
     <div class="card-title">⚙ Настройки</div>
     <label>GitHub Token</label>
     <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
     <div class="token-hint">
-      Создай токен на <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> с правом <strong>repo</strong>. Токен сохраняется локально в браузере.
+      Токен сохраняется только в твоём браузере — никто другой его не видит.
     </div>
     <label>Репозиторий (owner/repo)</label>
     <input type="text" id="github-repo" placeholder="Addicktoll/music_pybertat">
