@@ -564,11 +564,17 @@
 
   <!-- Список треков -->
   <div class="card">
-    <div class="card-title">♬ Треки в репозитории</div>
-    <div id="tracks-list" class="tracks-list">
-      <div class="empty-tracks">Загрузи трек чтобы он появился здесь</div>
+    <div class="card-title" style="cursor:pointer; user-select:none;" onclick="toggleTrackList()">
+      ♬ Треки в репозитории
+      <span id="collapse-icon" style="margin-left:auto; color:var(--gold); font-size:14px;">▼</span>
     </div>
-    <button onclick="loadTracks()" style="margin-top:16px; font-size:10px; padding:10px;">↻ Обновить список</button>
+    <div id="tracks-wrap">
+      <input type="text" id="track-search" placeholder="Поиск по названию..." oninput="filterTracks()" style="margin-bottom:12px;">
+      <div id="tracks-list" class="tracks-list">
+        <div class="empty-tracks">Загрузи трек чтобы он появился здесь</div>
+      </div>
+      <button onclick="loadTracks()" style="margin-top:16px; font-size:10px; padding:10px;">↻ Обновить список</button>
+    </div>
   </div>
 
   <div class="saved-notice">Настройки сохраняются в localStorage вашего браузера</div>
@@ -577,7 +583,40 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let selectedFile = null;
+let allTracks = [];
+
+function toggleTrackList() {
+  const wrap = document.getElementById('tracks-wrap');
+  const icon = document.getElementById('collapse-icon');
+  if (wrap.style.display === 'none') {
+    wrap.style.display = 'block';
+    icon.textContent = '▼';
+  } else {
+    wrap.style.display = 'none';
+    icon.textContent = '▶';
+  }
+}
+
+function filterTracks() {
+  const query = document.getElementById('track-search').value.toLowerCase();
+  const list = document.getElementById('tracks-list');
+  if (allTracks.length === 0) return;
+  const filtered = allTracks.filter(f => f.name.toLowerCase().includes(query));
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-tracks">Ничего не найдено</div>';
+    return;
+  }
+  const { repo, branch } = getSettings();
+  list.innerHTML = filtered.map(f => {
+    const rawUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${encodeURIComponent(f.name)}`;
+    return `<div class="track-item">
+      <span class="track-name">🎵 ${f.name}</span>
+      <button class="track-copy" onclick="copyUrl('${rawUrl.replace(/'/g, "\\'")}')">Копировать</button>
+    </div>`;
+  }).join('');
+}
+
+
 
 // Загрузка сохранённых настроек
 window.addEventListener('load', () => {
@@ -720,6 +759,7 @@ async function loadTracks() {
     if (!res.ok) throw new Error('Не удалось загрузить список');
     const files = await res.json();
     const audio = files.filter(f => /\.(mp3|ogg|wav|flac)$/i.test(f.name));
+    allTracks = audio;
 
     if (audio.length === 0) {
       list.innerHTML = '<div class="empty-tracks">Треков пока нет</div>';
